@@ -101,6 +101,7 @@ vim.o.shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
 vim.o.shellquote = ''
 vim.o.shellxquote = ''
 
+vim.o.equalalways = false
 -- [[ Setting options ]]
 -- See :help vim.opt
 -- NOTE: You can change these options as you wish!
@@ -168,6 +169,28 @@ vim.opt.scrolloff = 10
 vim.opt.tags:append 'C:/Users/summer2788/mori/projects/mapledev/GIT_NT_Trunk/ACGame_NT/tags'
 vim.opt.tags:append 'C:/Users/summer2788/mori/projects/mapledev/GIT_NT_Trunk/ACGame_NT/*/tags'
 
+vim.keymap.set('n', '<C-]>', function()
+  local cword = vim.fn.expand '<cword>'
+  local tags = vim.fn.taglist(cword)
+
+  if #tags == 0 then
+    vim.notify('No tag found for: ' .. cword, vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd 'wincmd s'
+  vim.cmd 'wincmd j'
+  vim.cmd 'resize'
+
+  local success, err = pcall(function()
+    vim.cmd('tjump ' .. cword)
+  end)
+
+  if not success then
+    vim.notify('Tag jump failed: ' .. err, vim.log.levels.ERROR)
+  end
+end, { noremap = true, silent = true })
+
 -- [[ Basic Keymaps ]]
 --  See :help vim.keymap.set()
 
@@ -230,6 +253,12 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- Add this near the top of your init.lua (after setting options)
+local function resize_windows()
+  -- your preferred resize logic
+  vim.cmd 'resize'
+end
 
 --    See :help lazy.nvim.txt or https://github.com/folke/lazy.nvim for more info
 -- [[ Install lazy.nvim plugin manager ]]
@@ -414,6 +443,16 @@ require('lazy').setup({
       -- This opens a window that shows you all of the keymaps for the current
       -- Telescope picker. This is really useful to discover what Telescope can
       -- do as well as how to actually do it!
+      local actions = require 'telescope.actions'
+
+      -- helper to wrap built‑in telescope actions so we can run our own
+      -- resize AFTER telescope has finished opening the file / split
+      local function wrap(action)
+        return function(prompt_bufnr)
+          action(prompt_bufnr) -- run the original action
+          vim.schedule(resize_windows) -- defer so layout is final
+        end
+      end
 
       -- [[ Configure Telescope ]]
       -- See :help telescope and :help telescope.setup()
@@ -427,9 +466,22 @@ require('lazy').setup({
         --   },
         -- },
         -- pickers = {}
-        extensions = {
-          ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
+        --   mappings = {
+        defaults = {
+          mappings = {
+            i = {
+              -- keep original behaviour but with resize after
+              ['<CR>'] = wrap(actions.select_default),
+              ['<C-x>'] = wrap(actions.select_horizontal),
+              ['<C-v>'] = wrap(actions.select_vertical),
+              ['<C-t>'] = wrap(actions.select_tab),
+            },
+            n = {
+              ['<CR>'] = wrap(actions.select_default),
+              ['<C-x>'] = wrap(actions.select_horizontal),
+              ['<C-v>'] = wrap(actions.select_vertical),
+              ['<C-t>'] = wrap(actions.select_tab),
+            },
           },
         },
       }
@@ -446,7 +498,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>st', builtin.live_grep, { desc = '[S]earch by Grep_String' })
+      vim.keymap.set('n', '<leader>st', builtin.tags, { desc = '[S]earch [T]ags (ctags)' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
