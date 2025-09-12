@@ -403,7 +403,7 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
+    branch = 'master',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -980,8 +980,8 @@ require('lazy').setup({
   },
 
   --[[
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
+  { -- you can easily change to a different colorscheme.
+    -- change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use :Telescope colorscheme.
@@ -1005,7 +1005,7 @@ require('lazy').setup({
   {
     'scottmckendry/cyberdream.nvim',
     lazy = false,
-    priority = 1001,
+    priority = 1000,
     config = function()
       require('cyberdream').setup {
         variant = 'default',
@@ -1128,6 +1128,7 @@ require('lazy').setup({
       config = '🛠',
       event = '📅',
       ft = '📂',
+      -- vim: ts=2 sts=2 sw=2 et
       init = '⚙',
       keys = '🗝',
       plugin = '🔌',
@@ -1135,11 +1136,9 @@ require('lazy').setup({
       require = '🌙',
       source = '📄',
       start = '🚀',
+      -- The line beneath this is called modeline. See :help modeline
       task = '📌',
       lazy = '💤 ',
     },
   },
 })
-
--- The line beneath this is called modeline. See :help modeline
--- vim: ts=2 sts=2 sw=2 et
