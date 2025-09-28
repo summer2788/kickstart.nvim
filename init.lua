@@ -165,6 +165,9 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+vim.opt.shiftwidth = 2 -- number of spaces for indent
+vim.opt.softtabstop = 1 -- spaces when pressing <Tab
+
 --set ctags
 vim.opt.tags:append 'C:/Users/summer2788/mori/projects/mapledev/GIT_NT_Trunk/ACGame_NT/tags'
 vim.opt.tags:append 'C:/Users/summer2788/mori/projects/mapledev/GIT_NT_Trunk/ACGame_NT/*/tags'
@@ -222,8 +225,8 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 -- Move lines up and down
 vim.keymap.set('n', 'K', ':m .-2<CR>==')
 vim.keymap.set('n', 'J', ':m .+1<CR>==')
@@ -383,7 +386,7 @@ require('lazy').setup({
       -- Document existing key chains
       spec = {
         { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
-        { '<leader>d', group = '[D]ocument' },
+        { '<leader>d', group = '[D]ebug' },
         { '<leader>r', group = '[R]ename' },
         { '<leader>s', group = '[S]earch' },
         { '<leader>w', group = '[W]orkspace' },
@@ -797,6 +800,7 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'clang-format',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -851,7 +855,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- cpp = { 'clang_format' },
+        cpp = { 'clang_format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -877,6 +881,13 @@ require('lazy').setup({
           end
           return 'make install_jsregexp'
         end)(),
+
+        config = function()
+          -- load your Lua snippets from ~/.config/nvim/lua/snippets
+          require('luasnip.loaders.from_lua').lazy_load {
+            paths = vim.fn.stdpath 'config' .. '/lua/snippets',
+          }
+        end,
         dependencies = {
           -- friendly-snippets contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
@@ -1048,8 +1059,8 @@ require('lazy').setup({
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
+      local statusline = require 'mini.statusline'
       statusline.setup { use_icons = vim.g.have_nerd_font }
 
       --hightlight the cursorword even if does not have lsp
@@ -1083,7 +1094,7 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'cpp', 'c' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -1102,6 +1113,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
+
   require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',

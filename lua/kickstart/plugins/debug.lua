@@ -27,42 +27,49 @@ return {
   keys = {
     -- Basic debugging keymaps, feel free to change to your liking!
     {
-      '<F5>',
+      '<leader>dd',
       function()
         require('dap').continue()
       end,
       desc = 'Debug: Start/Continue',
     },
     {
-      '<F1>',
+      '<leader>dx',
+      function()
+        require('dap').terminate()
+      end,
+      desc = 'Debug: Terminate',
+    },
+    {
+      '<leader>di',
       function()
         require('dap').step_into()
       end,
       desc = 'Debug: Step Into',
     },
     {
-      '<F2>',
+      '<leader>dn',
       function()
         require('dap').step_over()
       end,
       desc = 'Debug: Step Over',
     },
     {
-      '<F3>',
+      '<leader>do',
       function()
         require('dap').step_out()
       end,
       desc = 'Debug: Step Out',
     },
     {
-      '<leader>b',
+      '<leader>db',
       function()
         require('dap').toggle_breakpoint()
       end,
       desc = 'Debug: Toggle Breakpoint',
     },
     {
-      '<leader>B',
+      '<leader>dB',
       function()
         require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
       end,
@@ -70,7 +77,7 @@ return {
     },
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     {
-      '<F7>',
+      '<leader>du',
       function()
         require('dapui').toggle()
       end,
@@ -80,6 +87,27 @@ return {
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
+
+    -- tell mason-nvim-dap to install it, too
+    -- (add 'local-lua-debugger-vscode' to ensure_installed if you prefer Mason package names)
+    -- ensure_installed can accept either DAP names or Mason package names via this plugin.
+    -- For Lua we’ll define adapter+config explicitly:
+
+    dap.adapters.lua = {
+      type = 'executable',
+      command = vim.fn.stdpath 'data' .. '/mason/packages/local-lua-debugger-vscode/extension/debugAdapter.js',
+      args = {},
+    }
+
+    dap.configurations.lua = {
+      {
+        name = 'Debug current file',
+        type = 'lua',
+        request = 'launch',
+        program = '${file}',
+        cwd = '${workspaceFolder}',
+      },
+    }
 
     require('mason-nvim-dap').setup {
       -- Makes a best effort to setup the various debuggers with
@@ -95,6 +123,7 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'codelldb',
       },
     }
 
