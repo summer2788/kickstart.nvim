@@ -16,7 +16,7 @@ ls.add_snippets('cpp', {
     },
     i(0),
     t {
-      'Solutin s{};',
+      'Solution s{};',
       '',
       '}',
     },
